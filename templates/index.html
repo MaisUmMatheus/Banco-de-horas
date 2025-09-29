@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Banco de Horas</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body class="container mt-4">
+
+    <!-- Top Bar -->
+    <nav class="navbar navbar-light bg-light mb-4 d-flex justify-content-between">
+        <a class="navbar-brand">Banco de Horas</a>
+        <div>
+            <button class="btn btn-secondary me-2" data-bs-toggle="modal" data-bs-target="#modalSemanas">
+                Semanas
+            </button>
+            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#resetModal">
+                Reiniciar 40h
+            </button>
+        </div>
+    </nav>
+
+    <h1 class="text-center">Banco de Horas</h1>
+
+    <div class="alert alert-info text-center">
+        Saldo restante: <b>{{ saldo // 60 }}h {{ saldo % 60 }}min</b>
+    </div>
+
+    <form action="/add" method="post" class="mb-4">
+        <div class="row">
+            <div class="col">
+                <input type="date" name="data" class="form-control" required>
+            </div>
+            <div class="col">
+                <input type="time" name="hora_saida" class="form-control" required>
+            </div>
+            <div class="col">
+                <input type="time" name="hora_retorno" class="form-control" required>
+            </div>
+            <div class="col">
+                <button class="btn btn-primary w-100">Adicionar</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Tabela de registros -->
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Saída</th>
+                <th>Retorno</th>
+                <th>Tempo (min)</th>
+                <th>Déficit (min)</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in registros %}
+            <tr>
+                <td>{{ r[1] }}</td>
+                <td>{{ r[2] }}</td>
+                <td>{{ r[3] }}</td>
+                <td>{{ r[4] }}</td>
+                <td>{{ r[5] }}</td>
+                <td>
+                    <form action="/delete/{{ r[0] }}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Modal de Reset -->
+    <div class="modal fade" id="resetModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Reiniciar Banco de Horas</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <p>Déficit total acumulado: <strong>{{ total_deficit }} minutos</strong></p>
+            <p>Deseja realmente resetar o saldo para 40h?</p>
+          </div>
+          <div class="modal-footer">
+            <form action="/reset" method="post">
+              <button type="submit" class="btn btn-danger">Resetar</button>
+            </form>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Semanas -->
+    <div class="modal fade" id="modalSemanas" tabindex="-1" aria-labelledby="modalSemanasLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalSemanasLabel">Gerenciar Semanas</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+
+            <!-- Form para adicionar semana -->
+            <form action="/add_semana" method="post" class="d-flex mb-3">
+              <input type="text" name="nome" class="form-control me-2" placeholder="Nome da semana" required>
+              <button type="submit" class="btn btn-success">Adicionar</button>
+            </form>
+
+            <!-- Tabela de semanas -->
+            <table class="table table-bordered">
+              <thead>
+                <tr>
+                  <th>Semana</th>
+                  <th>Déficit Total (min)</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for s in semanas %}
+                <tr>
+                  <td>{{ s[1] }}</td>
+                  <td>{{ s[2] }}</td>
+                  <td>
+                    <form action="/delete_semana/{{ s[0] }}" method="post" style="display:inline;">
+                      <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
+                    </form>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+</body>
+</html>
